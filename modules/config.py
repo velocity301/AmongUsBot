@@ -18,12 +18,12 @@ discord_bot_token = "*"
 
 #Add keywords e.g. keyword_defeat = {"dafeatfa","deafeat;"}
 
-keyword_victory = {}
-keyword_defeat = {}
-keyword_imposter = {}
-keyword_crewmate = {}
-keyword_voting_ended = {}
-keyword_whos_imposter = {}
+keyword_victory = {"victory","vicory","viton"}
+keyword_defeat = {"defeat","deteat","netrtorat","neffeat","netfeat","defeat\\n\\n"}
+keyword_imposter = {"imposter","impostor","tmonetor"}
+keyword_crewmate = {"crewmate"}
+keyword_voting_ended = {"voting", "results","result","vetting","vartine","votingiresults","vetting)","\\n\\nvatiing","results\\n\\n","resulis\\n\\n","resuilis\\n\\n","resulis","resuilis"}
+keyword_whos_imposter = {"?","impestoe","who",'whos',"wino","innoosttor?","imsoster?","inostor?","imposter?","inyoostor?","iniposior?","inijposior?","impostor?","inoster?","tnrpester?","tnsester?","inraostor?","inaoster?","tnsoster?","tnpester?",'hnnsester?'}
 
 screen_resolution = "1920x1080"
 

@@ -37,9 +37,9 @@ async def help(ctx):
 
 # Python bot commands (you can also use this manually if you dont want to set up the python program!)
     
-.mute                       | Mutes everyone that is currently not dead
+.task                       | Mutes everyone that is currently not dead
 
-.unmute                     | Unmutes everyone that is currently not dead
+.discussion                 | Unmutes everyone that is currently not dead
 
 .clear                      | Unmutes everyone including the dead (This is used when you win or lose!)
 
@@ -68,6 +68,7 @@ async def host(ctx):
 
     if leader == None:
         leader = ctx.author
+        print(ctx.author)
         await ctx.send(f"```[*] Host connected: {ctx.author.name}```")
     elif leader != None and leader != ctx.author:
         await ctx.send(f"```[*] Sorry, {leader} is already a host. The host can disconnect by typing .host once more```")
@@ -91,7 +92,7 @@ async def users(ctx):
 
 
 @bot.command()
-async def mute(ctx):
+async def task(ctx):
     global leader
     global ghostmode_on
 
@@ -99,25 +100,23 @@ async def mute(ctx):
     in_discussion = False
 
     try:
-        if ctx.author != leader: #make sure no one else can run these commands
+        if ctx.author == leader: #make sure no one else can run these commands
+            for member in list(bot.get_channel(leader.voice.channel.id).members):
+                if member.id in dead_members and ghostmode_on:
+                    await member.edit(mute=False)
+                elif member.id not in dead_members and ghostmode_on:
+                    await member.edit(deafen=True, mute=True)
+                else:
+                    await member.edit(mute=True)
+
+        else:
             await ctx.send("```[*] Only the host can use this command```")
-    except: pass
-
-    try:
-        for member in list(bot.get_channel(leader.voice.channel.id).members):
-            if member.id in dead_members and ghostmode_on:
-                await member.edit(mute = False)
-            elif member.id not in dead_members and ghostmode_on:
-                await member.edit(deafen = True, mute = True)
-            else:
-                await member.edit(mute = True)
-
     except AttributeError as e:
         print("[*] The host of the program must connect first using .host")
 
 
 @bot.command()
-async def unmute(ctx):
+async def discussion(ctx): #, alias = "disc"
     global leader
     global dead_members
     global ghostmode_on
@@ -126,24 +125,21 @@ async def unmute(ctx):
     in_discussion = True
 
     try:
-        if ctx.author != leader: #make sure no one else can run these commands
+        if ctx.author == leader: #make sure no one else can run these commands
+            for member in list(bot.get_channel(leader.voice.channel.id).members):
+                if member.id in dead_members and ghostmode_on:
+                    await member.edit(mute=True)
+                elif member.id in dead_members and ghostmode_on == False:
+                    await member.edit(mute=True)
+                elif member.id not in dead_members and ghostmode_on:
+                    await member.edit(deafen=False, mute=False)
+                else:
+                    await member.edit(mute=False)
+
+        else:
             await ctx.send("```[*] Only the host can use this command```")
-    except: pass
-
-    try:
-        for member in list(bot.get_channel(leader.voice.channel.id).members):
-            if member.id in dead_members and ghostmode_on:
-                await member.edit(mute = True)
-            elif member.id in dead_members and ghostmode_on == False:
-                await member.edit(mute = True)
-            elif member.id not in dead_members and ghostmode_on:
-                await member.edit(deafen = False, mute = False)
-            else:
-                await member.edit(mute = False)
-
-    except AttributeError:
+    except AttributeError as e:
         print("[*] The host of the program must connect first using .host")
-
 
 @bot.command()
 async def clear(ctx):  #unmute and clear the dead
@@ -227,18 +223,24 @@ async def ghostmode(ctx):
 async def ping(ctx):
     await ctx.send("`[*] Pong`")
 
+class ContextObject:
+    def __init__(self, author):
+        self.author = author
 
 async def handle_request(request):
     action = request.match_info.get('action', "nothing")
-    if action == "mute":
-        await mute(None)
-    elif action == "unmute":
-        await unmute(None)
+    print(request)
+    ctx = ContextObject("")
+    if request.host == "127.0.0.1:8080":
+        ctx.author = leader
+    if action == "task":
+        await task(ctx)
+    elif action == "discussion":
+        await discussion(ctx)
     elif action == "clear":
-        await clear(None)
-
+        await clear(ctx)
     return web.Response(text=None)
-    
+
 
 async def run_bot():
     app = web.Application()

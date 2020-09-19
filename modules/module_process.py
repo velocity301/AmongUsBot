@@ -21,10 +21,8 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 def processDiscussion(image: complex) -> int:
     #1 = Not found, 2 = Discussion found, 3 = Voting ended found
 
-    discussion = {"?","impestoe","who",'whos',"wino","innoosttor?","imsoster?","inostor?","imposter?","inyoostor?","iniposior?","inijposior?","impostor?","inoster?","tnrpester?","tnsester?","inraostor?","inaoster?","tnsoster?","tnpester?",'hnnsester?'}
-    discussion.update(keyword_whos_imposter)
-    voting = {"voting", "results","result","vetting","vartine","votingiresults","vetting)","\\n\\nvatiing","results\\n\\n","resulis\\n\\n","resuilis\\n\\n","resulis","resuilis"}
-    discussion.update(keyword_voting_ended)
+    discussion = keyword_whos_imposter
+    voting = keyword_voting_ended
     raw_output = pytesseract.image_to_string(image)
     
     out = set(raw_output.strip().strip('\n').strip("\\").strip("/").lower().split(" "))
@@ -34,7 +32,7 @@ def processDiscussion(image: complex) -> int:
 
     if len(out.intersection(discussion)) != 0: #if one of the keywords for discussion time is present
         print("DISCUSSION [UNMUTED]")
-        requests.get(f"http://{address}:{port}/unmute")
+        requests.get(f"http://{address}:{port}/discussion")
 
         return 2
 
@@ -48,14 +46,10 @@ def processDiscussion(image: complex) -> int:
 def processEnding(image: complex) -> bool:
     delay = 3.5 #Delay between getting role and game starting
 
-    defeat = {"defeat","deteat","netrtorat","neffeat","netfeat","defeat\\n\\n"}
-    defeat.update(keyword_defeat)
-    victory = {"victory","vicory","viton"}
-    victory.update(keyword_victory)
-    imposter = {"imposter","impostor","tmonetor"}
-    imposter.update(keyword_imposter)
-    crewmate = {"crewmate"}
-    crewmate.update(keyword_crewmate)
+    defeat = keyword_defeat
+    victory = keyword_victory
+    imposter = keyword_imposter
+    crewmate = keyword_crewmate
     
     raw_output = pytesseract.image_to_string(image)
     
@@ -64,28 +58,28 @@ def processEnding(image: complex) -> bool:
     if debug_mode:
         print(out)
 
-    if len(out.intersection(defeat)) != 0: #if one of the keywords for defeat is present
+    if len(out.intersection(defeat)) > 0: #if one of the keywords for defeat is present
         print("DEFEAT [UNMUTED]")
         requests.get(f"http://{address}:{port}/clear") #unmute everyone including the dead
         return True
 
-    elif len(out.intersection(victory)) != 0: #if one of the keywords for victory is present
+    elif len(out.intersection(victory)) > 0: #if one of the keywords for victory is present
         print("VICTORY [UNMUTED]")
         requests.get(f"http://{address}:{port}/clear") #unmute everyone including the dead
         return True
 
-    elif len(out.intersection(crewmate)) != 0: #if one of the keywords for crewmate is present
+    elif len(out.intersection(crewmate)) > 0: #if one of the keywords for crewmate is present
         print("YOU GOT CREWMATE [MUTING SOON]")
 
         time.sleep(delay + delay_start)
-        requests.get(f"http://{address}:{port}/mute") #mute
+        requests.get(f"http://{address}:{port}/task") #mute
         return False
 
-    elif len(out.intersection(imposter)) != 0: #if one of the keywords for imposter is present
+    elif len(out.intersection(imposter)) > 0: #if one of the keywords for imposter is present
         print("YOU GOT IMPOSTER [MUTING SOON]")
 
         time.sleep(delay + delay_start)
-        requests.get(f"http://{address}:{port}/mute") #mute
+        requests.get(f"http://{address}:{port}/task") #mute
         return False
     else:
         print(".")
