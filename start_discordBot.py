@@ -160,7 +160,7 @@ async def clear(ctx):  #unmute and clear the dead
         print("[*] The host of the program must connect first using .host")
 
 
-@bot.command()
+@bot.command(aliases = ["mute"])
 async def dead(ctx):
     global dead_members
     global ghostmode_on
